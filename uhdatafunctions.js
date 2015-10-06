@@ -2,9 +2,9 @@
 /**
  *  This file contains functions that deal with the University of Hawaii Degrees Awarded data set.
  */
-/*globals _, uhdata */
+/*globals _, uhdata, testdata */
 /*exported add, totalDegrees, isHawaiian, hawaiianLegacy, totalHawaiians, percentageHawaiian, checkYear, yearData, totalDegreesByYear */
-/*exported listCampuses, campusGroup, listCampusDegrees, yearGroup, maxDegrees, isDoctoral, doctoral, doctoralDegreePrograms */
+/*exported listCampuses, campusGroup, listCampusDegrees, yearGroup, maxDegrees, isDoctoral, doctoral, doctoralDegreePrograms, hasAwards */
 /**
  * Adds up the amount of degrees awarded
  * @param memo
@@ -12,8 +12,20 @@
  * @returns total awards
  */
 var add = function(memo, record){
+  if(isNaN(record["AWARDS"])){
+    throw new Error("Non-numeric AWARDS.");
+  }
   return memo + record["AWARDS"];
 };
+
+/**
+ * Returns true if the passed record has an AWARDS field.
+ * @param record        The record.
+ * @returns {boolean}   True if AWARDS field is present.
+ */
+function hasAwards(record){
+  return record.hasOwnProperty("AWARDS");
+}
 
 /**
  * Calculates the total number of degrees awarded
@@ -21,6 +33,9 @@ var add = function(memo, record){
  * @returns total number of degrees awarded in the data set
  */
 var totalDegrees = function(data){
+  if(!_.every(data, hasAwards)){
+    throw new Error("No AWARDS field.");
+  }
   return _.reduce(data, add, 0);
 };
 
@@ -167,10 +182,4 @@ var doctoralDegreePrograms = function(data){
   return _.unique(_.pluck(doctoral(data), "CIP_DESC"));
 };
 
-console.log(totalDegrees(uhdata));
-console.log(percentageHawaiian(uhdata));
-console.log(totalDegreesByYear(uhdata, 2010));
-console.log(listCampuses(uhdata));
-console.log(listCampusDegrees(uhdata));
-console.log(maxDegrees(uhdata));
-console.log(doctoralDegreePrograms(uhdata));
+var testdata = uhdata.slice(0,2).concat(_.find(uhdata,isHawaiian));
